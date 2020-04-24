@@ -1,0 +1,195 @@
+<template>
+  <div class="content-container">
+    <!-- 系统管理 - 配置 - 编辑 -->
+    <div class="config-edit-container">
+      <el-form
+        ref="ruleForm"
+        :model="ruleForm"
+        :rules="rules"
+        label-width="100px"
+        class="demo-ruleForm"
+      >
+        <el-form-item label="配置名称" prop="name">
+          <el-input v-model="ruleForm.name" class="setting"></el-input>
+        </el-form-item>
+        <el-form-item label="配置编码" prop="code">
+          <el-input v-model="ruleForm.code" class="setting"></el-input>
+        </el-form-item>
+        <el-form-item label="数据类型">
+          <el-select v-model="ruleForm.type" class="setting">
+            <el-option
+              v-for="(item, index) in dataType"
+              :key="item.key"
+              :label="item.label"
+              :value="item.value"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="配置值" prop="value">
+          <el-select v-model="ruleForm.infoId" class="settingEdit">
+            <el-option v-for="(item,index) in setValue" :key="item.key" :label="item.memo" :value="item.infoId"></el-option>
+          </el-select>
+          <el-button v-permission="['sys:config:update']" type="primary" plain @click.native="goEditValue">编辑</el-button>
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-switch
+            :active-value="0"
+            :inactive-value="1"
+            v-model="ruleForm.status"
+            class="demo"
+            active-color="#00A854"
+            active-text=""
+            inactive-color="#cccccc"
+            inactive-text=""
+          />
+        </el-form-item>
+
+        <el-form-item>
+          <el-button type="primary" @click="submitForm('ruleForm')">确定</el-button>
+          <el-button @click.native="cancelSetting">取消</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
+  </div>
+</template>
+
+<script>
+import {
+  editSystemConfig,
+  systemConfigType,
+  updateSystemConfig,
+  systemValue
+} from "@/api/system.js";
+
+export default {
+  name: "SystemConfigEdit",
+  components: {},
+  data() {
+    return {
+      // 默认状态值
+      statusValue: "0",
+      // 获取数据类型
+      dataType: "",
+      // 获取配置值
+      setValue: "",
+      // 接收路由传来的Id
+      acceptId: "",
+      // 表单所有要提交的字段
+      ruleForm: {},
+      // 表单验证
+      rules: {
+        name: [{ required: true, message: "请输入配置名称", trigger: "blur" }],
+        code: [{ required: true, message: "请输入配置编码", trigger: "blur" }],
+        type: [
+          { required: true, message: "请选择数据类型", trigger: "change" }
+        ],
+        infoId: [{ trigger: "blur" }]
+      }
+    };
+  },
+  // watch: {
+  //   $route: "onRouteChange"
+  // },
+  created() {
+    this.getConfigDetail();
+    this.configDataType();
+  },
+  methods: {
+    onRouteChange() {
+      // 监听路由的变化
+    },
+
+    // 获取状态值
+    getStatus(val) {
+      console.log("val", val);
+    },
+
+    // 获取数据类型
+    configDataType() {
+      systemConfigType().then(res => {
+        this.dataType = res.result;
+      });
+    },
+
+    // 根据路由传来的id获取数据
+    getConfigDetail() {
+      this.acceptId = this.$route.params.id; // 接收id
+      // 获取详情数据
+      editSystemConfig(this.acceptId).then(res => {
+        console.log("data", res);
+        this.ruleForm = res.result;
+        // 获取配置值
+        systemValue(this.ruleForm.code).then(res => {
+          console.log("值", res);
+          this.setValue = res.result;
+        });
+      });
+    },
+
+
+    // 点击确定提交表单
+    submitForm(ruleForm) {
+      console.log("提交数据", this.ruleForm);
+      this.$refs[ruleForm].validate(valid => {
+        if (this.ruleForm.type === "") {
+          this.$message.error("数据类型不能为空！");
+        } else if (this.ruleForm.infoId === "") {
+          this.$message.error("配置值不能为空！");
+        } else if (!valid) {
+          this.$message.error("请填写完整再提交！");
+          return false;
+        } else {
+          const data = {
+            code: this.ruleForm.code,
+            configId: this.ruleForm.configId,
+            infoId: this.ruleForm.infoId,
+            type: this.ruleForm.type,
+            name: this.ruleForm.name,
+            status: Number(this.ruleForm.status)
+          };
+          updateSystemConfig(data).then(res => {
+            console.log("commit", res);
+            if (res.code === 200) {
+              this.$message.success("修改成功！");
+            } else {
+              this.$message.error("修改失败！");
+            }
+          })
+            .catch(err => {
+              console.log(err);
+            });
+        }
+      });
+    },
+
+    // 点击取消跳转菜单管理页面
+    cancelSetting() {
+      this.$store.dispatch("delView", this.$route);
+      this.$router.go(-1);
+    },
+
+    // 点击配置值的编辑跳转编辑配置值页面
+    goEditValue() {
+      console.log('配置值Id', this.ruleForm.infoId);
+      this.$router.push({
+        name: "SystemConfigValue",
+        query: {
+          code: this.ruleForm.code
+        }
+      });
+    }
+  }
+};
+</script>
+
+<style lang="less" scoped>
+.config-edit-container {
+  padding: 20px;
+  .setting {
+    width: 500px;
+  }
+  .settingEdit {
+    width: 425px;
+  }
+}
+</style>

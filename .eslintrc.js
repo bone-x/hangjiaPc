@@ -1,0 +1,58 @@
+module.exports = {
+    root: true,
+    parserOptions: {
+        parser: 'babel-eslint',
+        sourceType: 'module'
+    },
+    env: {
+        browser: true,
+        node: true,
+        es6: true,
+    },
+    extends: ['eslint:recommended', 'plugin:vue/recommended', 'airbnb'],
+
+    // add your custom rules here
+    //it is base on https://github.com/vuejs/eslint-config-vue
+    rules: {
+        'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+        'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+        'global-require': 0,
+        'import/no-dynamic-require': 0,
+        'linebreak-style': 0,
+        'no-new': 0,
+        'import/no-unresolved': 0,
+        'vue/no-parsing-error': [2, { 'x-invalid-end-tag': false }],
+        'vue/html-self-closing': 'off',
+        'prefer-destructuring': 0,
+        'max-len': 1,
+        'no-lonely-if': 0,
+        'vue/max-attributes-per-line': 1,
+        'no-plusplus': 0,
+        'no-param-reassign': 1,
+        'quotes': 1,
+        'comma-dangle': 1,
+        'no-underscore-dangle': 0,
+        'no-unused-expressions': 1,
+        'no-restricted-syntax': 1,
+        'import/extensions': 0,
+        'consistent-return': 0,
+        'import/no-webpack-loader-syntax': 1,
+        'no-cond-assign': 0,
+        'prefer-template': 0,
+        'no-useless-escape': 0,
+        'no-shadow': 1,
+        'arrow-body-style': 1,
+        'no-bitwise': 1,
+        'prefer-promise-reject-errors': 1,
+        'no-control-regex': 1,
+        'no-nested-ternary': 1,
+        'react/jsx-filename-extension': 0,
+        'react/react-in-jsx-scope': 0,
+        'object-curly-newline': 1,
+        'func-names': 0,
+        'arrow-parens': 0,
+        'implicit-arrow-linebreak': 0,
+        'no-template-curly-in-string': 0,
+        'no-unused-vars': 'warn',
+    }
+}
